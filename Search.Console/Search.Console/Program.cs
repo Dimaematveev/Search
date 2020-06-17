@@ -11,6 +11,8 @@ namespace Search.Console
     {
         static void Main(string[] args)
         {
+            System.Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             int[] mass = new int[]
             {
                 8569,8910,-8825,8115,-3834,-7315,-7114,-5486,6338,-2322,-3152,-1923,398,5902,-6749,-2745,-1265,-8541,-9921,7504,2223,-2119,3338,6626,4432,7490,7407,-1753,-653,9020,-4126,-5275,-8100,9273,-6391,-9466,-3730,5579,1000,-2257,-6304,8629,-4504,6174,6990,6569,601,1230,9636,9049,
@@ -34,55 +36,34 @@ namespace Search.Console
                 -7249,-3065,7103,6016,4083,6173,-885,-1201,-1896,-1245,2931,9706,-3606,7864,2883,-3413,-6647,-3055,-872,2534,-6654,9205,-1936,8208,-4396,5315,-7721,5423,-6832,-6663,391,577,2978,25,5637,-1229,-7759,5394,-2414,-3436,4457,-3057,-1023,9956,2617,5525,5737,7745,-3088,7307,
                 2766,-9426,1429,-4164,-5954,-6455,8871,8895,412,8767,3894,3692,-4370,-5234,8364,-7646,-3273,6368,-7773,-5889,-5654,-2042,9359,-7437,8077,6402,228,-1893,-4409,78,9578,-5467,-1490,-4139,571,-183,9147,-2858,-4022,2092,-100,-6654,-5018,-1182,2670,-9235,-8687,-5790,-8408,262,
             };
+            
+            var search = new TypeSearch(mass);
+            SearchAll(search, search.InterpolationSearch);
+            SearchAll(search, search.BinarySearch);
+           
+            System.Console.WriteLine();
+            System.Console.ReadKey();
+        }
+
+        private static void SearchAll(TypeSearch search, Func<int,int> searchType)
+        {
             List<Count1> count1s = new List<Count1>();
-            var interpolationSearch = new InterpolationSearch(mass);
-            int minK = 0;
-            int minCount = 10000;
-            int maxK = 0;
-            int maxCount = 0;
-            foreach (var i in mass)
+            int min = search.Items[0] - 100;
+            int max = search.Items.Last() + 101;
+            for (int i = min; i < max; i++)
             {
-
-                var z = interpolationSearch.Search(i);
-                var k = interpolationSearch.CountCompare;
+                var z = searchType(i);
+                var k = search.CountCompare;
                 count1s.Add(new Count1(i, z, k));
-                if (k < minCount)
-                {
-                    minCount = k;
-                    minK = i;
-                }
-                if (k > maxCount)
-                {
-                    maxCount = k;
-                    maxK = i;
-                }
             }
-
-            System.Console.WriteLine($"Minimum:Item={minK}, Count={minCount}.");
-            System.Console.WriteLine($"Maximum:Item={maxK}, Count={maxCount}.");
             var co = count1s.GroupBy(x => x.CountCompare);
-            co= co.OrderBy(x => x.Key);
+            co = co.OrderBy(x => x.Key);
+            System.Console.WriteLine($"{search.NameTypeSearch}:");
             foreach (var item in co)
             {
                 System.Console.WriteLine($"CountCompare={item.Key} - CountItems{item.Count()}.");
             }
-            //for (int i = 0; i < count1s.Max(x=>x.CountCompare); i++)
-            //{
-            //    System.Console.WriteLine($"CountCompare={i} - CountItems{minCount}.");
-            //}
-            /*
-                Random rnd = new Random();
-                for (int i = 0; i < 1000; i++)
-                {
-                    if (i % 50 == 0) 
-                    {
-                        System.Console.WriteLine();
-                    }
-                    System.Console.Write($"{rnd.Next(-10000,10000)},");
-                }
-            */
             System.Console.WriteLine();
-            System.Console.ReadKey();
         }
     }
 }
